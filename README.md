@@ -22,19 +22,29 @@ This project uses Terraform to set up an Zabbix environment on Hetzner Cloud. It
    ```bash
    export TF_VAR_hcloud_token=your_hetzner_cloud_api_token
    ```
+   or create a file `hetzner_token.auto.tfvars` with the following content:
+   ```hcl
+    hcloud_token = "your_hetzner_cloud_api_token"
+    ```
 
 3. Run the Terraform script:
-   ```bash
-   ./terraform.sh
-   ```
-   This will initialize Terraform, create a plan, and apply the changes.
+  ```bash
+    ./terraform.sh
+  ```
+
+  This will initialize Terraform, create a plan, and apply the changes.
+  The script also supports other Terraform commands like `init`, `plan`, `apply` and `destroy`.
+  If you want to run a specific command, you can pass it as an argument to the script:
+  ```bash
+    ./terraform.sh plan
+  ```
 
 ## Infrastructure Details
 
 - 1 Zabbix Server (Debian 12, cx22 server type)
 - 1 Zabbix Agent (Debian 12, cx22 server type)
-- Private network (10.0.0.0/8) with a subnet (10.10.0.0/24)
-- IPv6 enabled for all servers (no public IPv4 addresses to save costs)
+- Private network (10.0.0.0/8) with a subnet (10.10.1.0/24)
+- IPv4 and IPv6 addresses for the Zabbix Server and Agent
 
 ## Customization
 
@@ -47,7 +57,3 @@ To destroy all created resources, run:
 ```bash
 ./terraform.sh destroy
 ```
-
-## Note
-
-Ensure your local machine has IPv6 connectivity to access the created servers.

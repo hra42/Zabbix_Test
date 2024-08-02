@@ -58,8 +58,8 @@ resource "hcloud_server" "Zabbix-Server" {
 
     keep_disk = true
     public_net {
-        # no ipv4 address -> 1 €/month extra
-        ipv4_enabled = false
+        # needs to be enabled for Github access -> 1 €/month extra
+        ipv4_enabled = true
         # ipv6 address for external internet access -> free
         ipv6_enabled = true
     }
@@ -94,8 +94,8 @@ resource "hcloud_server" "Zabbix-Agents" {
 
     keep_disk = true
     public_net {
-        # no ipv4 address -> 1 €/month extra
-        ipv4_enabled = false
+        # needs to be enabled for Github access -> 1 €/month extra
+        ipv4_enabled = true
         # ipv6 address for external internet access -> free
         ipv6_enabled = true
     }
@@ -108,4 +108,34 @@ resource "hcloud_server" "Zabbix-Agents" {
     depends_on = [
         hcloud_network_subnet.Zabbix-Sub-Network
     ]
+}
+
+output "Zabbix-Server-IPv4" {
+  value = hcloud_server.Zabbix-Server.ipv4_address
+  description = "The IPv4 address of the Zabbix Server"
+}
+
+output "Zabbix-Server-IPv6" {
+  value = hcloud_server.Zabbix-Server.ipv6_address
+  description = "The IPv6 address of the Zabbix Server"
+}
+
+output "next_steps" {
+  value = <<EOT
+
+  Next Steps:
+  1. SSH into the Zabbix Server:
+    ssh root@$(hcloud_server.Zabbix-Server.ipv4_address)
+  2. Check the Output of the Cloud-Init Script:
+    cat /var/log/cloud-init-output.log
+  3. Check the Status of the Docker Containers:
+    docker ps
+  4. Open the Zabbix Web Interface:
+    http://$(hcloud_server.Zabbix-Server.ipv4_address)
+  5. Login with the following credentials:
+    Username: Admin
+    Password: zabbix
+  EOT
+
+  description = "Next steps to configure the Zabbix Server"
 }

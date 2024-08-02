@@ -1,10 +1,10 @@
 #cloud-config
-package_update: true
-package_upgrade: true
 packages:
   - ca-certificates
   - curl
   - git
+package_update: true
+package_upgrade: true
 runcmd:
   # Install docker
   # Add Docker's official GPG key
