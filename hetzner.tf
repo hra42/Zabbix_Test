@@ -101,11 +101,11 @@ resource "hcloud_server" "Zabbix-Agents" {
     }
 
     network {
-        network_id = hcloud_network.Ansible-Network.id
+        network_id = hcloud_network.Zabbix-Network.id
         ip = "10.10.1.${count.index + 11}"
     }
 
     depends_on = [
-        hcloud_network_subnet.Ansible-Sub-Network
+        hcloud_network_subnet.Zabbix-Sub-Network
     ]
 }
