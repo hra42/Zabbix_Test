@@ -1,18 +1,18 @@
-# Terraform Hetzner Cloud Ansible Setup
+# Terraform Hetzner Cloud Zabbix Setup
 
-This project uses Terraform to set up an Ansible environment on Hetzner Cloud. It creates an Ansible controller and multiple Ansible nodes, all connected via a private network.
+This project uses Terraform to set up an Zabbix environment on Hetzner Cloud. It creates an Zabbix Server and Agent all connected via a private network.
 
 ## Files
 
 1. `terraform.sh`: A bash script to simplify running Terraform commands using Docker.
 2. `hetzner.tf`: The main Terraform configuration file for creating resources on Hetzner Cloud.
-3. `ansible-config.yml`: A cloud-init configuration file for setting up the Ansible controller.
+3. `zabbix-config.yml`: A cloud-init configuration file for setting up Zabbix.
 
 ## Prerequisites
 
 - Docker installed on your local machine
 - A Hetzner Cloud account and API token (security>api-tokens>add API token)
-- SSH key pair (the public key should be uploaded to your Hetzner Cloud account with the name "Ansible")
+- SSH key pair (the public key should be uploaded to your Hetzner Cloud account with the name `Zabbix`)
 
 ## Usage
 
@@ -29,23 +29,17 @@ This project uses Terraform to set up an Ansible environment on Hetzner Cloud. I
    ```
    This will initialize Terraform, create a plan, and apply the changes.
 
-4. After the script completes, follow the instructions in the "Next steps" output to:
-   - Copy the inventory file to the Ansible controller
-   - Copy your SSH private key to the Ansible controller
-   - SSH into the Ansible controller
-   - Verify connectivity with all nodes
-
 ## Infrastructure Details
 
-- 1 Ansible Controller (Debian 12, cx22 server type)
-- 3 Ansible Nodes (Debian 12, cx22 server type)
+- 1 Zabbix Server (Debian 12, cx22 server type)
+- 1 Zabbix Agent (Debian 12, cx22 server type)
 - Private network (10.0.0.0/8) with a subnet (10.10.0.0/24)
 - IPv6 enabled for all servers (no public IPv4 addresses to save costs)
 
 ## Customization
 
 - Modify the `hetzner.tf` file to change the number of nodes, server types, or other configurations.
-- Adjust the `ansible-config.yml` file to customize the initial setup of the Ansible controller.
+- Adjust the `zabbix-config.yml` file to customize the Zabbix installation.
 
 ## Clean Up
 

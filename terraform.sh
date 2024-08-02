@@ -2,7 +2,7 @@
 # Author: Henry Rausch
 # Version: 1.0
 # GitHub: https://github.com/hra42
-# Date: 25.07.2024
+# Date: 02.08.2024
 # Description: This script is used to make the use of the terraform docker image easier
 # It will run the docker image with the current directory mounted as /terraform
 
