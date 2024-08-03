@@ -9,3 +9,4 @@
 
 # Optionally, ignore auto.tfvars files if you want to keep them out of version control
 *.auto.tfvars
+.aider*
