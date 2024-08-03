@@ -9,9 +9,19 @@
 # Pull the latest terraform image
 docker pull hashicorp/terraform:latest
 
-# check if TF_VAR_hcloud_token=your_hetzner_cloud_api_token exists
-# if not, ask the user to provide it
-if [ -z "$TF_VAR_hcloud_token" ]; then
+# Check if hcloud_token exists in auto.tfvars file
+if [ -f "hetzner_token.auto.tfvars" ]; then
+    hcloud_token=$(grep -oP 'hcloud_token\s*=\s*"\K[^"]+' hetzner_token.auto.tfvars)
+    if [ -n "$hcloud_token" ]; then
+        export TF_VAR_hcloud_token="$hcloud_token"
+    else
+        echo "hcloud_token not found in hetzner_token.auto.tfvars file."
+        echo "Please provide your Hetzner Cloud API token:"
+        read -s TF_VAR_hcloud_token
+        export TF_VAR_hcloud_token
+    fi
+else
+    echo "hetzner_token.auto.tfvars file not found."
     echo "Please provide your Hetzner Cloud API token:"
     read -s TF_VAR_hcloud_token
     export TF_VAR_hcloud_token
