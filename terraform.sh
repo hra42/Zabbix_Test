@@ -9,22 +9,25 @@
 # Pull the latest terraform image
 docker pull hashicorp/terraform:latest
 
-# Check if hcloud_token exists in auto.tfvars file
-if [ -f "hetzner_token.auto.tfvars" ]; then
-    hcloud_token=$(grep -oP 'hcloud_token\s*=\s*"\K[^"]+' hetzner_token.auto.tfvars)
-    if [ -n "$hcloud_token" ]; then
-        export TF_VAR_hcloud_token="$hcloud_token"
+# Check if TF_VAR_hcloud_token is already set in the environment
+if [ -z "$TF_VAR_hcloud_token" ]; then
+    # If not set in environment, check if hcloud_token exists in auto.tfvars file
+    if [ -f "hetzner_token.auto.tfvars" ]; then
+        hcloud_token=$(grep -oP 'hcloud_token\s*=\s*"\K[^"]+' hetzner_token.auto.tfvars)
+        if [ -n "$hcloud_token" ]; then
+            export TF_VAR_hcloud_token="$hcloud_token"
+        else
+            echo "hcloud_token not found in hetzner_token.auto.tfvars file."
+            echo "Please provide your Hetzner Cloud API token:"
+            read -s TF_VAR_hcloud_token
+            export TF_VAR_hcloud_token
+        fi
     else
-        echo "hcloud_token not found in hetzner_token.auto.tfvars file."
+        echo "hetzner_token.auto.tfvars file not found and TF_VAR_hcloud_token not set in environment."
         echo "Please provide your Hetzner Cloud API token:"
         read -s TF_VAR_hcloud_token
         export TF_VAR_hcloud_token
     fi
-else
-    echo "hetzner_token.auto.tfvars file not found."
-    echo "Please provide your Hetzner Cloud API token:"
-    read -s TF_VAR_hcloud_token
-    export TF_VAR_hcloud_token
 fi
 
 # Allow the user to override the default script with init, plan, apply, or destroy
