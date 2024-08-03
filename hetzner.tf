@@ -38,17 +38,23 @@ resource "hcloud_network_subnet" "Zabbix-Sub-Network" {
     network_zone = "eu-central"
 }
 
-# Create Ansible Controller
+# Generate a random password for Postgres
+resource "random_password" "postgres_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# Create Zabbix Server
 resource "hcloud_server" "Zabbix-Server" {
     name        = "Zabbix-Server"
     image       = "debian-12"
-    # Currently: 2 vCPUs (shared), 4 GB RAM, 40 GB Disk, 20 TB Traffic, 0.006 €/h -> 3,92 €/month
     server_type = "cx22"
     location    = "fsn1"
     user_data = file("zabbix-config.yml")
 
     labels = {
-        "env" = "test"
+        "env"  = "test"
         "role" = "zabbix-server"
     }
 
@@ -83,6 +89,12 @@ resource "hcloud_server" "Zabbix-Agents" {
     server_type = "cx22"
     location    = "fsn1"
 
+    # Use templatefile function to populate the cloud-config file with dynamic values
+    user_data = templatefile("zabbix-agent-cloud-config.yml", {
+        ip_address = hcloud_server.Zabbix-Server.ipv4_address
+        hostname   = "Zabbix-Agent-${count.index}"
+    })
+
     labels = {
         "env" = "test"
         "role" = "zabbix-agent"
@@ -106,7 +118,8 @@ resource "hcloud_server" "Zabbix-Agents" {
     }
 
     depends_on = [
-        hcloud_network_subnet.Zabbix-Sub-Network
+        hcloud_network_subnet.Zabbix-Sub-Network,
+        hcloud_server.Zabbix-Server
     ]
 }
 
@@ -120,22 +133,36 @@ output "Zabbix-Server-IPv6" {
   description = "The IPv6 address of the Zabbix Server"
 }
 
+output "Zabbix-Agent-IPv4" {
+  value = hcloud_server.Zabbix-Agents[*].ipv4_address
+  description = "The IPv4 addresses of the Zabbix Agents"
+}
+
+output "Zabbix-Agent-IPv6" {
+  value = hcloud_server.Zabbix-Agents[*].ipv6_address
+  description = "The IPv6 addresses of the Zabbix Agents"
+}
+
 output "next_steps" {
   value = <<EOT
 
   Next Steps:
   1. SSH into the Zabbix Server:
-    ssh root@$(hcloud_server.Zabbix-Server.ipv4_address)
+    ssh root@${hcloud_server.Zabbix-Server.ipv4_address}
   2. Check the Output of the Cloud-Init Script:
     cat /var/log/cloud-init-output.log
   3. Check the Status of the Docker Containers:
     docker ps
   4. Open the Zabbix Web Interface:
-    http://$(hcloud_server.Zabbix-Server.ipv4_address)
+    http://${hcloud_server.Zabbix-Server.ipv4_address}
   5. Login with the following credentials:
     Username: Admin
     Password: zabbix
+  6. SSH into the Zabbix Agent:
+    ssh root@${hcloud_server.Zabbix-Agents[0].ipv4_address}
+  7. Check the Zabbix Agent Docker container:
+    docker ps | grep zabbix-agent
   EOT
 
-  description = "Next steps to configure the Zabbix Server"
+  description = "Next steps to configure the Zabbix Server and Agent"
 }
