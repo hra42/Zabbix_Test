@@ -1,0 +1,31 @@
+#cloud-config
+
+# Update and upgrade the system
+package_update: true
+package_upgrade: true
+
+# Install Docker
+packages:
+  - docker.io
+
+# Start Docker service
+runcmd:
+  - systemctl start docker
+  - systemctl enable docker
+
+# Create Zabbix agent configuration file
+write_files:
+  - path: /etc/zabbix/zabbix_agent2.conf
+    content: |
+      Server=${ip_address}
+      ServerActive=${ip_address}
+      Hostname=${hostname}
+
+# Run Zabbix agent Docker container
+  - docker run -d --name zabbix-agent \
+      --restart unless-stopped \
+      --network host \
+      -e ZBX_HOSTNAME="${hostname}" \
+      -e ZBX_SERVER_HOST="${ip_address}" \
+      -v /etc/zabbix/zabbix_agent2.conf:/etc/zabbix/zabbix_agent2.conf \
+      zabbix/zabbix-agent2:latest
