@@ -1,0 +1,36 @@
+#cloud-config
+
+# This file is a template. The following variables will be replaced by Terraform:
+# ${ip_address} - The IP address of the Zabbix server
+# ${hostname} - The hostname of this Zabbix agent
+
+# Update and upgrade the system
+package_update: true
+package_upgrade: true
+
+# Start Docker service
+runcmd:
+  # Install docker
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+  - chmod a+r /etc/apt/keyrings/docker.asc
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Create Zabbix agent configuration file
+write_files:
+  - path: /etc/zabbix/zabbix_agent2.conf
+    content: |
+      Server=${ip_address}
+      ServerActive=${ip_address}
+      Hostname=${hostname}
+
+  # Run Zabbix agent Docker container
+  - docker run -d --name zabbix-agent \
+    --restart unless-stopped \
+    --network host \
+    -e ZBX_HOSTNAME="${hostname}" \
+    -e ZBX_SERVER_HOST="${ip_address}" \
+    -v /etc/zabbix/zabbix_agent2.conf:/etc/zabbix/zabbix_agent2.conf \
+    zabbix/zabbix-agent2:latest
