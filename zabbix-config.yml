@@ -18,7 +18,7 @@ runcmd:
   - git clone https://github.com/zabbix/zabbix-docker.git
   - cd zabbix-docker
   - git checkout 7.0
-  - docker compose -f ./docker-compose_v3_alpine_mysql_latest.yaml up -d
+  - docker compose -f ./docker-compose_v3_alpine_mysql_latest.yaml --profile full up -d
   # Wait for Zabbix to start (sleep for 2 minutes)
   - sleep 120
   # Secure SSH
