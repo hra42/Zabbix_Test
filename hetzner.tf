@@ -162,6 +162,16 @@ output "next_steps" {
     ssh root@${hcloud_server.Zabbix-Agents[0].ipv4_address}
   7. Check the Zabbix Agent Docker container:
     docker ps | grep zabbix-agent
+  8. Add the Zabbix Agent to the Zabbix Server:
+    Go to Data collection -> Hosts or Monitoring -> Hosts
+    Click on Create host to the right (or on the host name to edit an existing host)
+    Hostname: Zabbix-Agent-0
+    Groups: Linux Servers
+    Agent interfaces: IP Address: ${hcloud_server.Zabbix-Agents[0].ipv4_address}
+    Templates: Template OS Linux
+    Agent: Zabbix Agent
+    Save
+    For more information: https://www.zabbix.com/documentation/current/en/manual/config/hosts/host
   EOT
 
   description = "Next steps to configure the Zabbix Server and Agent"
